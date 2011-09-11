@@ -4,6 +4,39 @@ describe UsersController do
   render_views
   
   #Describe show user profile testing
+  describe "Get" 'index' do
+    describe "for non-signed in user" do
+      it "should deny access" do
+        get :index    
+        response.should redirect_to(signin_path) 
+      end
+   end
+   
+   describe "for signed in user" do
+     before(:each) do
+       @user = test_sign_in(Factory(:user))
+       Factory(:user, :email =>"another@example.com")
+       Factory(:user, :email =>"theistest@example.com")
+     end
+     it "should be success full" do
+       get :index
+       response.should be_success
+     end
+      it "should have the right title" do
+        get :index
+        response.should have_selector('title', :content => "All users")
+      end
+      
+      it "" do
+        get :index
+        User.all.each do |user|
+          response.should have_selector('li', :content =>user.name)
+        end
+      end
+      
+   end
+end
+  
   describe "Get 'show'" do
     
     before(:each) do

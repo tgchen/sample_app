@@ -12,12 +12,18 @@ describe UsersController do
       end
    end
    
-   describe "for signed in user" do
+    describe "for signed in user" do
      before(:each) do
        @user = test_sign_in(Factory(:user))
        Factory(:user, :email =>"another@example.com")
        Factory(:user, :email =>"theistest@example.com")
+       
+       30.times do
+       Factory(:user, :email => Factory.next(:email))
+      end
      end
+     
+     
      it "should be success full" do
        get :index
        response.should be_success
@@ -27,11 +33,20 @@ describe UsersController do
         response.should have_selector('title', :content => "All users")
       end
       
-      it "" do
+      it "should have element of each user" do
         get :index
-        User.all.each do |user|
-          response.should have_selector('li', :content =>user.name)
+        User.paginate(:page =>1 ).each do |user|
+        response.should have_selector('li', :content =>user.name)
         end
+      end
+      it "should paginate user" do
+        get :index
+        response.should have_selector('div.pagination')
+        response.should have_selector('span.disabled', :content => "Previous")
+        response.should have_selector('a', :href => "/users?page=2",
+                                           :content => "2")
+        response.should have_selector('a', :href => "/users?page=2",
+                                           :content => "Next")
       end
       
    end
